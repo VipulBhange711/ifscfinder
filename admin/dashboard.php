@@ -8,61 +8,104 @@ if (strlen($_SESSION['ifscaid'])==0) {
     $pageTitle = "Dashboard Overview";
     include_once('includes/modern-layout-top.php');
 
+    // Database Integrity Check for Charts
+    $integrityError = false;
+    try {
+        $dbh->query("SELECT CreationDate FROM tblbank LIMIT 1");
+        $dbh->query("SELECT CreationDate FROM tblstate LIMIT 1");
+        $dbh->query("SELECT CreationDate FROM tblcity LIMIT 1");
+    } catch (Exception $e) {
+        $integrityError = true;
+    }
+
     // Fetch metrics
-    $sql1 ="SELECT * from tblbank";
-    $query1 = $dbh->prepare($sql1);
-    $query1->execute();
-    $totbank = $query1->rowCount();
+    $totbank = $totstate = $totcity = 0;
+    try {
+        $sql1 ="SELECT * from tblbank";
+        $query1 = $dbh->prepare($sql1);
+        $query1->execute();
+        $totbank = $query1->rowCount();
 
-    $sql2 ="SELECT * from tblstate";
-    $query2 = $dbh->prepare($sql2);
-    $query2->execute();
-    $totstate = $query2->rowCount();
+        $sql2 ="SELECT * from tblstate";
+        $query2 = $dbh->prepare($sql2);
+        $query2->execute();
+        $totstate = $query2->rowCount();
 
-    $sql3 ="SELECT * from tblcity";
-    $query3 = $dbh->prepare($sql3);
-    $query3->execute();
-    $totcity = $query3->rowCount();
+        $sql3 ="SELECT * from tblcity";
+        $query3 = $dbh->prepare($sql3);
+        $query3->execute();
+        $totcity = $query3->rowCount();
+    } catch (Exception $e) {}
 
     // Fetch Growth Data (Last 6 Months)
     $months = [];
     $counts = [];
-    for ($i = 5; $i >= 0; $i--) {
-        $monthName = date('M', strtotime("-$i months"));
-        $monthNum = date('m', strtotime("-$i months"));
-        $year = date('Y', strtotime("-$i months"));
-        
-        $sqlG = "SELECT 
-                    ((SELECT COUNT(*) FROM tblbank WHERE MONTH(CreationDate) = :m1 AND YEAR(CreationDate) = :y1) +
-                     (SELECT COUNT(*) FROM tblstate WHERE MONTH(CreationDate) = :m2 AND YEAR(CreationDate) = :y2) +
-                     (SELECT COUNT(*) FROM tblcity WHERE MONTH(CreationDate) = :m3 AND YEAR(CreationDate) = :y3)) as total";
-        $queryG = $dbh->prepare($sqlG);
-        $queryG->bindParam(':m1', $monthNum, PDO::PARAM_INT);
-        $queryG->bindParam(':y1', $year, PDO::PARAM_INT);
-        $queryG->bindParam(':m2', $monthNum, PDO::PARAM_INT);
-        $queryG->bindParam(':y2', $year, PDO::PARAM_INT);
-        $queryG->bindParam(':m3', $monthNum, PDO::PARAM_INT);
-        $queryG->bindParam(':y3', $year, PDO::PARAM_INT);
-        $queryG->execute();
-        $rowG = $queryG->fetch(PDO::FETCH_ASSOC);
-        
-        $months[] = $monthName;
-        $counts[] = (int)$rowG['total'];
+    if (!$integrityError) {
+        for ($i = 5; $i >= 0; $i--) {
+            $monthName = date('M', strtotime("-$i months"));
+            $monthNum = date('m', strtotime("-$i months"));
+            $year = date('Y', strtotime("-$i months"));
+            
+            try {
+                $sqlG = "SELECT 
+                            ((SELECT COUNT(*) FROM tblbank WHERE MONTH(CreationDate) = :m1 AND YEAR(CreationDate) = :y1) +
+                             (SELECT COUNT(*) FROM tblstate WHERE MONTH(CreationDate) = :m2 AND YEAR(CreationDate) = :y2) +
+                             (SELECT COUNT(*) FROM tblcity WHERE MONTH(CreationDate) = :m3 AND YEAR(CreationDate) = :y3)) as total";
+                $queryG = $dbh->prepare($sqlG);
+                $queryG->bindParam(':m1', $monthNum, PDO::PARAM_INT);
+                $queryG->bindParam(':y1', $year, PDO::PARAM_INT);
+                $queryG->bindParam(':m2', $monthNum, PDO::PARAM_INT);
+                $queryG->bindParam(':y2', $year, PDO::PARAM_INT);
+                $queryG->bindParam(':m3', $monthNum, PDO::PARAM_INT);
+                $queryG->bindParam(':y3', $year, PDO::PARAM_INT);
+                $queryG->execute();
+                $rowG = $queryG->fetch(PDO::FETCH_ASSOC);
+                
+                $months[] = $monthName;
+                $counts[] = (int)$rowG['total'];
+            } catch (Exception $e) {
+                $months[] = $monthName;
+                $counts[] = 0;
+            }
+        }
+    } else {
+        // Fallback for missing columns
+        $months = ['No Data'];
+        $counts = [0];
     }
 
     // Fetch Recent Activity
-    $sqlActivity = "(SELECT 'Bank' as type, BankName as title, CreationDate, 'plus' as icon, 'emerald' as color FROM tblbank)
-                    UNION
-                    (SELECT 'State' as type, State as title, CreationDate, 'map' as icon, 'purple' as color FROM tblstate)
-                    UNION
-                    (SELECT 'City' as type, City as title, CreationDate, 'navigation' as icon, 'blue' as color FROM tblcity)
-                    UNION
-                    (SELECT 'Detail' as type, Branch as title, CreationDate, 'git-branch' as icon, 'amber' as color FROM tblbankdetail)
-                    ORDER BY CreationDate DESC LIMIT 5";
-    $queryActivity = $dbh->prepare($sqlActivity);
-    $queryActivity->execute();
-    $activities = $queryActivity->fetchAll(PDO::FETCH_OBJ);
+    $activities = [];
+    try {
+        $sqlActivity = "(SELECT 'Bank' as type, BankName as title, CreationDate, 'plus' as icon, 'emerald' as color FROM tblbank)
+                        UNION
+                        (SELECT 'State' as type, State as title, CreationDate, 'map' as icon, 'purple' as color FROM tblstate)
+                        UNION
+                        (SELECT 'City' as type, City as title, CreationDate, 'navigation' as icon, 'blue' as color FROM tblcity)
+                        UNION
+                        (SELECT 'Detail' as type, Branch as title, CreationDate, 'git-branch' as icon, 'amber' as color FROM tblbankdetail)
+                        ORDER BY CreationDate DESC LIMIT 5";
+        $queryActivity = $dbh->prepare($sqlActivity);
+        $queryActivity->execute();
+        $activities = $queryActivity->fetchAll(PDO::FETCH_OBJ);
+    } catch (Exception $e) {}
 ?>
+
+<?php if($integrityError): ?>
+<!-- Database Sync Warning -->
+<div class="mb-8 p-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-[2rem] flex items-center gap-6 animate__animated animate__shakeX">
+    <div class="p-4 bg-amber-100 dark:bg-amber-800 rounded-2xl text-amber-600 dark:text-amber-400">
+        <i data-lucide="database-zap" class="w-8 h-8"></i>
+    </div>
+    <div>
+        <h4 class="text-lg font-black text-amber-900 dark:text-amber-100">Database Out of Sync</h4>
+        <p class="text-sm text-amber-700 dark:text-amber-400 font-medium">Your database is missing required columns for charts. Please import <b>database.sql</b> to fix this.</p>
+    </div>
+    <a href="../database.sql" download class="ml-auto px-6 py-3 bg-amber-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-amber-600/20 hover:bg-amber-700 transition-premium">
+        Get SQL Fix
+    </a>
+</div>
+<?php endif; ?>
 
 <!-- Metric Cards -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-10">
