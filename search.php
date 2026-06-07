@@ -1,264 +1,139 @@
 <?php
 session_start();
-//error_reporting(0);
 include('admin/includes/dbconnection.php');
 ?>
 <!doctype html>
-<html class="no-js" lang="en">
+<html lang="en">
 
 <head>
-    
-    <!--====== Title ======-->
-    <title>IFSC Code Finder Portal | Home</title>
-    
-    <!--====== Slick CSS ======-->
-    <link rel="stylesheet" href="assets/css/slick.css">
-        
-    <!--====== Font Awesome CSS ======-->
-    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
-        
-    <!--====== Line Icons CSS ======-->
-    <link rel="stylesheet" href="assets/css/LineIcons.css">
-        
-    <!--====== Animate CSS ======-->
-    <link rel="stylesheet" href="assets/css/animate.css">
-        
-    <!--====== Magnific Popup CSS ======-->
-    <link rel="stylesheet" href="assets/css/magnific-popup.css">
-        
-    <!--====== Bootstrap CSS ======-->
-    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
-    
-    <!--====== Default CSS ======-->
-    <link rel="stylesheet" href="assets/css/default.css">
-    
-    <!--====== Style CSS ======-->
-    <link rel="stylesheet" href="assets/css/style.css">
-<script type="text/javascript">
-function copyText(){
- document.getElementById("txt_copy").select();
- document.execCommand('copy');
-}
-</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results | IFSC Code Finder Portal</title>
+    <?php include_once('includes/public-header.php'); ?>
 </head>
 
-<body>
-    
-    
-    <!--====== HEADER PART START ======-->
-    
-    <header class="header-area">
-        <div class="navbar-area headroom">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-12">
-                        <nav class="navbar navbar-expand-lg">
-                            <h3 style="color: red;padding-right: 50px;">IFSC Code Finder Portal</h3>
-                            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                                <span class="toggler-icon"></span>
-                                <span class="toggler-icon"></span>
-                                <span class="toggler-icon"></span>
-                            </button>
+<body class="bg-slate-50 font-sans text-slate-900 antialiased selection:bg-primary-500/30">
 
-                            <div class="collapse navbar-collapse sub-menu-bar" id="navbarSupportedContent">
-                                <ul id="nav" class="navbar-nav m-auto">
-                                    
-                                   <li class="nav-item" style="color:red">
-                                        <a href="index.php">Home</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a href="admin/login.php">Admin</a>
-                                    </li>
-                                   
-                        </nav> <!-- navbar -->
+    <!-- Page Header / Search Again -->
+    <section class="pt-40 pb-20 relative overflow-hidden bg-white">
+        <div class="absolute top-0 left-0 w-full h-full pointer-events-none">
+            <div class="absolute top-[-10%] right-[-5%] w-[40%] h-[40%] bg-primary-500/5 rounded-full blur-[100px]"></div>
+        </div>
+        <div class="container mx-auto px-6 relative z-10 text-center space-y-8">
+            <h1 class="text-4xl lg:text-5xl font-black tracking-tighter">Search <span class="text-primary-600">Results</span></h1>
+            
+            <!-- Mini Search Bar -->
+            <div class="max-w-2xl mx-auto">
+                <form action="search.php" method="post" class="relative group">
+                    <div class="absolute inset-y-0 left-0 flex items-center pl-6 pointer-events-none text-slate-400 group-focus-within:text-primary-600 transition-colors">
+                        <i data-lucide="search" class="w-5 h-5"></i>
                     </div>
-                </div> <!-- row -->
-            </div> <!-- container -->
-        </div> <!-- navbar area -->
-        
-   
-    </header>
-    
-    <!--====== HEADER PART ENDS ======-->
-   
- 
-    
-    <!--====== PRICING PART START ======-->
-    
-    <section data-scroll-index="0" id="pricing" class="pricing-area pt-115">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-lg-12 col-md-8 col-sm-9">
-                    <div class="section-title text-center pb-20 wow fadeInUpBig" data-wow-duration="1s" data-wow-delay="0.2s">
-                       
-                        
-                         <?php
-if(isset($_POST['search']))
-{ 
-
-$sdata=$_POST['searchifsccode'];
-  ?>
-  <h4 align="center" class="title">Result of "<?php echo $sdata;?>" Bank Detail </h4>
-                    </div> <!-- section title -->
-                </div>
-            </div> <!-- row -->
-            <div class="row no-gutters justify-content-center">
-                <div class="col-lg-12 col-md-7 col-sm-9">
-                      
-
-
-                            <div class="card-body">
-                                <table class="table " border="1">
-                                    <thead>
-                                        <tr>
-                                            <tr>
-                  <th>S.No.</th>
-                  <th>Bank Name</th>
-                  <th>State</th>
-                  <th>City</th>
-                  <th>Branch</th>
-                  <th>IFSC Code</th>
-                  <th>MICR Code</th>
-                  <th>Address</th>
-                  <th>Zip Code</th>
-                  <th>Contact Number</th>
-                </tr>
-                                  
-                                        </thead>
-                                    <?php
-
-$sql="SELECT tblbank.BankName as bn,tblbank.ID as bid,tblbank.ShortName,tblstate.State,tblcity.ID as cid,tblcity.StateID,tblcity.City,tblbankdetail.IFSCCode,tblbankdetail.StateID,tblbankdetail.ID as bdid,tblbankdetail.CityID,tblbankdetail.BankName,tblbankdetail.MICRCode,tblbankdetail.BankName,tblbankdetail.Address,tblbankdetail.Branch,tblbankdetail.PhoneNumber,tblbankdetail.BranchCode,tblbankdetail.ZipCode,tblbankdetail.CreationDate from tblbankdetail inner join tblstate on tblbankdetail.StateID=tblstate.ID join tblcity on tblbankdetail.CityID=tblcity.ID join tblbank on tblbankdetail.BankName=tblbank.ID where (tblbank.BankName like  '%$sdata%' || tblbankdetail.ZipCode like  '%$sdata%' || tblbankdetail.Branch like '%$sdata%')";
-$query = $dbh -> prepare($sql);
-$query->execute();
-$results=$query->fetchAll(PDO::FETCH_OBJ);
-
-$cnt=1;
-if($query->rowCount() > 0)
-{
-foreach($results as $row)
-{               ?>   
-              
-                <tr>
-                  <td><?php echo htmlentities($cnt);?></td>
-                  <td><?php  echo htmlentities($row->bn);?><br />
-                    (<?php  echo htmlentities($row->ShortName);?>)
-                  </td>
-                  <td><?php  echo htmlentities($row->State);?></td>
-                  <td><?php  echo htmlentities($row->City);?></td>
-                  <td><?php  echo htmlentities($row->Branch);?></td>
-                  <td style="color:blue;" >
-                    <?php  echo htmlentities($row->IFSCCode);?>
-                  </td>
-                  <td><?php  echo htmlentities($row->MICRCode);?></td>
-                  <td><?php  echo htmlentities($row->Address);?></td>
-                  <td><?php  echo htmlentities($row->ZipCode);?></td>
-                  <td><?php  echo htmlentities($row->PhoneNumber);?></td>
-                </tr>
-                 <?php 
-$cnt=$cnt+1;
-} } else { ?>
-  <tr>
-    <td colspan="10" style="color:red; text-align:center"> No record found against this search</td>
-
-  </tr>
-   
-<?php } }?>
-
-                                </table>
-                            </div>
-                </div>
-               
-               
-            </div> <!-- row -->
-        </div> <!-- container -->
-    </section>
-    
-    <!--====== PRICING PART ENDS ======-->
-    
-  
-    <!--====== BRAND PART START ======-->
-    
-    
-   
-    <!--====== FOOTER PART START ======-->
-    
-    <footer id="footer" class="footer-area bg_cover" style="background-image: url(assets/images/footer-bg.jpg)">
-        <div class="container">
-            <div class="footer-copyright text-center">
-                 <p class="text">© <?php echo date('Y');?> IFSC Code finder Portal</p>
+                    <input type="text" name="searchifsccode" value="<?php echo isset($_POST['searchifsccode']) ? htmlentities($_POST['searchifsccode']) : ''; ?>" required
+                           class="w-full bg-slate-50 border-none text-slate-900 text-base rounded-3xl pl-14 pr-32 py-5 shadow-inner focus:ring-4 focus:ring-primary-100 transition-premium"
+                           placeholder="Search again...">
+                    <button type="submit" name="search"
+                            class="absolute right-2 top-2 bottom-2 px-6 bg-primary-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary-700 transition-premium">
+                        Find
+                    </button>
+                </form>
             </div>
-        </div> <!-- container -->
-    </footer>
-    
-    <!--====== FOOTER PART ENDS ======-->
-    
-    <!--====== BACK TOP TOP PART START ======-->
+        </div>
+    </section>
 
-    <a href="#" class="back-to-top"><i class="lni-chevron-up"></i></a>
+    <!-- Results Section -->
+    <section class="py-24 relative min-h-[400px]">
+        <div class="container mx-auto px-6">
+            <?php
+            if (isset($_POST['search'])) {
+                $searchifsccode = $_POST['searchifsccode'];
+            ?>
+                <div class="mb-12 flex items-center justify-between">
+                    <p class="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Showing results for: <span class="text-slate-900"><?php echo htmlentities($searchifsccode); ?></span></p>
+                </div>
 
-    <!--====== BACK TOP TOP PART ENDS ======-->  
-<script type="text/javascript">
-    function myFunction() {
-  /* Get the text field */
-  var copyText = document.getElementById("myInput");
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <?php
+                    $sql = "SELECT tblbank.BankName as bn, tblbank.ShortName, tblstate.State, tblcity.City, tblbankdetail.IFSCCode, tblbankdetail.Branch, tblbankdetail.Address, tblbankdetail.MICRCode, tblbankdetail.PhoneNumber 
+                            FROM tblbankdetail 
+                            INNER JOIN tblstate ON tblbankdetail.StateID=tblstate.ID 
+                            JOIN tblcity ON tblbankdetail.CityID=tblcity.ID 
+                            JOIN tblbank ON tblbankdetail.BankName=tblbank.ID 
+                            WHERE tblbank.BankName LIKE :s OR tblbankdetail.IFSCCode LIKE :s OR tblbankdetail.ZipCode LIKE :s OR tblbankdetail.Branch LIKE :s";
+                    $query = $dbh->prepare($sql);
+                    $s = "%$searchifsccode%";
+                    $query->bindParam(':s', $s, PDO::PARAM_STR);
+                    $query->execute();
+                    $results = $query->fetchAll(PDO::FETCH_OBJ);
 
-  /* Select the text field */
-  copyText.select();
-  copyText.setSelectionRange(0, 99999); /* For mobile devices */
+                    if ($query->rowCount() > 0) {
+                        foreach ($results as $row) {
+                    ?>
+                            <div class="glass-card p-8 rounded-[2.5rem] group hover:bg-white transition-premium animate__animated animate__fadeInUp">
+                                <div class="flex items-start justify-between mb-8">
+                                    <div class="p-4 bg-primary-50 dark:bg-primary-900/30 text-primary-600 rounded-2xl group-hover:bg-primary-600 group-hover:text-white transition-premium">
+                                        <i data-lucide="landmark" class="w-6 h-6"></i>
+                                    </div>
+                                    <span class="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest">Verified</span>
+                                </div>
+                                
+                                <div class="space-y-4">
+                                    <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-primary-600 transition-colors">
+                                        <?php echo htmlentities($row->bn); ?>
+                                    </h3>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-3 text-sm font-bold text-slate-500">
+                                            <i data-lucide="git-branch" class="w-4 h-4 text-slate-400"></i>
+                                            <?php echo htmlentities($row->Branch); ?> Branch
+                                        </div>
+                                        <div class="flex items-center gap-3 text-sm font-bold text-slate-500">
+                                            <i data-lucide="map-pin" class="w-4 h-4 text-slate-400"></i>
+                                            <?php echo htmlentities($row->State); ?>, <?php echo htmlentities($row->City); ?>
+                                        </div>
+                                    </div>
 
-   /* Copy the text inside the text field */
-  navigator.clipboard.writeText(copyText.value);
+                                    <div class="pt-6 grid grid-cols-2 gap-4">
+                                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-white transition-premium">
+                                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">IFSC Code</p>
+                                            <p class="text-xs font-black text-primary-600 font-mono"><?php echo htmlentities($row->IFSCCode); ?></p>
+                                        </div>
+                                        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 group-hover:bg-white transition-premium">
+                                            <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">MICR Code</p>
+                                            <p class="text-xs font-black text-slate-900 font-mono"><?php echo htmlentities($row->MICRCode); ?></p>
+                                        </div>
+                                    </div>
 
-  /* Alert the copied text */
-  alert("Copied the text: " + copyText.value);
-}
-</script>
+                                    <div class="pt-4 border-t border-slate-100 mt-6 hidden group-hover:block animate__animated animate__fadeIn">
+                                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Full Address</p>
+                                        <p class="text-xs text-slate-600 leading-relaxed font-medium"><?php echo htmlentities($row->Address); ?></p>
+                                        <div class="flex items-center gap-2 mt-4 text-primary-600">
+                                            <i data-lucide="phone" class="w-3 h-3"></i>
+                                            <span class="text-xs font-bold"><?php echo htmlentities($row->PhoneNumber); ?></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    <?php
+                        }
+                    } else {
+                    ?>
+                        <div class="col-span-full py-20 text-center space-y-6">
+                            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-300">
+                                <i data-lucide="search-x" class="w-10 h-10"></i>
+                            </div>
+                            <h3 class="text-2xl font-black text-slate-900">No results found</h3>
+                            <p class="text-slate-500 font-medium">We couldn't find any bank details matching "<?php echo htmlentities($searchifsccode); ?>". Please check the spelling or try a different term.</p>
+                            <a href="index.php" class="inline-flex px-8 py-4 bg-primary-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-primary-700 transition-premium shadow-xl shadow-primary-500/20">Return Home</a>
+                        </div>
+                    <?php
+                    }
+                    ?>
+                </div>
+            <?php } ?>
+        </div>
+    </section>
 
+    <?php include_once('includes/public-footer.php'); ?>
 
-
-    <!--====== Jquery js ======-->
-    <script src="assets/js/vendor/jquery-1.12.4.min.js"></script>
-    <script src="assets/js/vendor/modernizr-3.7.1.min.js"></script>
-    
-    <!--====== Bootstrap js ======-->
-    <script src="assets/js/popper.min.js"></script>
-    <script src="assets/js/bootstrap.min.js"></script>
-    
-    <!--====== Slick js ======-->
-    <script src="assets/js/slick.min.js"></script>
-    
-    <!--====== Isotope js ======-->
-    <script src="assets/js/imagesloaded.pkgd.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    
-    <!--====== Counter Up js ======-->
-    <script src="assets/js/waypoints.min.js"></script>
-    <script src="assets/js/jquery.counterup.min.js"></script>
-    
-    <!--====== Circles js ======-->
-    <script src="assets/js/circles.min.js"></script>
-    
-    <!--====== Appear js ======-->
-    <script src="assets/js/jquery.appear.min.js"></script>
-    
-    <!--====== WOW js ======-->
-    <script src="assets/js/wow.min.js"></script>
-    
-    <!--====== Headroom js ======-->
-    <script src="assets/js/headroom.min.js"></script>
-    
-    <!--====== Jquery Nav js ======-->
-    <script src="assets/js/jquery.nav.js"></script>
-    
-    <!--====== Scroll It js ======-->
-    <script src="assets/js/scrollIt.min.js"></script>
-    
-    <!--====== Magnific Popup js ======-->
-    <script src="assets/js/jquery.magnific-popup.min.js"></script>
-    
-    <!--====== Main js ======-->
-    <script src="assets/js/main.js"></script>
-    
 </body>
 
 </html>
